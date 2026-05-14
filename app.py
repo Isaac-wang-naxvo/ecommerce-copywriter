@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI, APIError, AuthenticationError
-import time
+import os
 
 # 設定頁面配置
 st.set_page_config(
@@ -12,11 +12,28 @@ st.set_page_config(
 
 # 側邊欄設定
 st.sidebar.title("⚙️ 設定")
-api_key = st.sidebar.text_input(
-    "OpenAI API Key",
-    type="password",
-    placeholder="sk-..."
-)
+
+# 安全性優化：優先從 Streamlit Secrets 讀取，再允許手動輸入
+def get_api_key():
+    """
+    優先從 st.secrets 讀取 API Key，若不存在則允許使用者手動輸入
+    """
+    # 先嘗試從 secrets 讀取
+    try:
+        if "OPENAI_API_KEY" in st.secrets:
+            return st.secrets["OPENAI_API_KEY"]
+    except Exception as e:
+        st.warning(f"⚠️ 讀取 Secrets 時出現問題：{str(e)}")
+    
+    # 若 secrets 中無 API Key，允許使用者手動輸入
+    api_key = st.sidebar.text_input(
+        "OpenAI API Key（備案輸入）",
+        type="password",
+        placeholder="sk-... (如已配置 Streamlit Secrets 則無需填寫)",
+        help="如果未配置 Streamlit Secrets，請在此輸入您的 OpenAI API Key"
+    )
+    return api_key if api_key else None
+
 
 # 功能選擇菜單
 st.sidebar.markdown("---")
@@ -37,8 +54,10 @@ feature = st.sidebar.radio(
 # 初始化 OpenAI 客戶端函數
 def get_openai_client():
     """取得 OpenAI 客戶端，並驗證 API Key"""
+    api_key = get_api_key()
+    
     if not api_key or api_key.strip() == "":
-        st.error("❌ 請在左側邊欄輸入 OpenAI API Key")
+        st.error("❌ 請在側邊欄輸入 OpenAI API Key，或配置 Streamlit Secrets")
         return None
     
     try:
@@ -190,7 +209,7 @@ elif feature == "🔄 廣告標題 A/B 測試生成器":
 # 功能3：SEO FAQ 批量生成器
 elif feature == "❓ SEO FAQ 批量生成器":
     st.title("❓ SEO FAQ 批量生成器")
-    st.markdown("**輸入關鍵字，自動產生 5 組 SEO 最佳化的常見問答**")
+    st.markdown("**輸入關鍵字，自動產生 SEO 最佳化的常見問答**")
     
     keywords_input = st.text_input(
         "輸入目標關鍵字",
@@ -398,7 +417,7 @@ elif feature == "🏥 診所衛教文件草稿機":
 
 1. **病症簡介**（用 2-3 句白話文解釋這個病症是什麼）
 2. **常見症狀**（列舉 3-4 個常見症狀）
-3. **預防重點**（列出 3 個最重要的預防或照護重點，附簡要說明）
+3. **預防/照護重點**（列出 3 個最重要的預防或照護重點，附簡要說明）
 4. **日常保健小貼士**（3-4 個實用的日常保健建議）
 5. **何時應就醫**（列舉應該立即就醫的警示信號）
 
@@ -410,8 +429,7 @@ elif feature == "🏥 診所衛教文件草稿機":
                     st.success("✅ 衛教文件產生完成！")
                     
                     # 添加免責聲明
-                    full_output = f"""
-⚠️ **重要免責聲明**
+                    full_output = f"""⚠️ **重要免責聲明**
 本內容由 AI 生成，僅供參考之用。如有健康疑慮，請務必諮詢專業醫師進行診斷與治療。
 
 ---
@@ -474,7 +492,7 @@ elif feature == "🎥 YouTube 影片腳本大綱器":
 
 請提供以下內容（使用 Markdown 格式）：
 
-## 📍 Hook 鉤子開場（前 15 秒）
+## 🎣 Hook 鉤子開場（前 15 秒）
 - 一個引人入勝的開場句子，立即抓住觀眾注意力
 - 簡單說明影片會帶來什麼價值
 
@@ -505,10 +523,15 @@ elif feature == "🎥 YouTube 影片腳本大綱器":
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
 ### 📖 使用說明
-1. 在上方輸入您的 OpenAI API Key
+1. 在上方輸入您的 OpenAI API Key（或配置 Streamlit Secrets）
 2. 選擇所需功能
 3. 填寫相應資訊
 4. 點擊按鈕自動生成
+
+### ⚙️ 安全性設定
+- 優先使用 **Streamlit Secrets** 讀取 API Key
+- 若未配置 Secrets，可手動輸入作為備案
+- 絕不在程式碼中硬編碼 API Key
 
 ### ⚡ 功能特點
 - 使用 GPT-4o Mini 模型
@@ -516,10 +539,14 @@ st.sidebar.markdown("""
 - 完整的錯誤處理機制
 - 實時預覽與複製功能
 
-### 🆕 新增功能 (v1.2)
-- **🍴 餐廳菜單文案優化器**
-- **🏥 診所衛教文件草稿機**
-- **🎥 YouTube 影片腳本大綱器**
+### 🆕 功能列表 (v1.2)
+- **📦** 電商商品文案生成器
+- **🔄** 廣告標題A/B測試生成器
+- **❓** SEO FAQ批量生成器
+- **📧** Newsletter內容重組器
+- **🍴** 餐廳菜單文案優化器
+- **🏥** 診所衛教文件草稿機
+- **🎥** YouTube影片腳本大綱器
 
-**版本**：v1.2 MVP
+**版本**：v1.2 MVP（安全性優化版）
 """)
