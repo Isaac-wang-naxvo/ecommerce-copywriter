@@ -26,7 +26,8 @@ feature = st.sidebar.radio(
     options=[
         "📦 電商商品文案生成器",
         "🔄 廣告標題 A/B 測試生成器",
-        "❓ SEO FAQ 批量生成器"
+        "❓ SEO FAQ 批量生成器",
+        "📧 Newsletter 內容重組器"
     ]
 )
 
@@ -242,6 +243,62 @@ A：[詳細答案]
                     st.code(result)
 
 
+# =====================
+# 功能 4: Newsletter 內容重組器
+# =====================
+elif feature == "📧 Newsletter 內容重組器":
+    st.header("📧 Newsletter 內容重組器")
+    st.markdown("將長篇文章自動拆解、重組為適合電子報發送的精簡段落")
+
+    source_text = st.text_area(
+        "輸入長篇文章內容",
+        height=300,
+        placeholder="請貼上您想轉換的長篇文章或部落格內容..."
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        tone = st.selectbox(
+            "電子報語氣",
+            ["專業嚴謹", "親切幽默", "激勵人心", "簡約直白"]
+        )
+    with col2:
+        target_reader = st.text_input(
+            "目標讀者",
+            placeholder="例：創業者、行銷新手"
+        )
+
+    if st.button("🚀 重組為電子報內容", use_container_width=True, type="primary", key="newsletter_gen"):
+        if not source_text.strip():
+            st.warning("⚠️ 請提供來源文章內容")
+        elif not target_reader.strip():
+            st.warning("⚠️ 請填寫目標讀者")
+        else:
+            with st.spinner("正在重組電子報內容..."):
+                prompt = f"""
+請將以下長篇文章改寫為適合 Newsletter（電子報）發送的格式。
+
+【目標語氣】：{tone}
+【目標讀者】：{target_reader}
+【原文內容】：
+{source_text}
+
+要求：
+1. **主旨列 (Subject Line)**：產出 3 個高開啟率的標題。
+2. **引言 (Hook)**：一段引人入勝的開場，吸引讀者繼續閱讀。
+3. **精簡段落**：將原文拆解為 3 個帶有子標題的重點段落，每段不超過 100 字。
+4. **行動呼籲 (CTA)**：一個具備導購或點擊驅動力的結尾。
+
+請使用 Markdown 格式輸出。
+"""
+                result = call_openai_api(prompt, max_tokens=2000)
+                
+                if result:
+                    st.success("✅ 電子報重組完成！")
+                    st.markdown(result)
+                    st.code(result)
+
+
 # 頁腳說明
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
@@ -257,5 +314,9 @@ st.sidebar.markdown("""
 - 完整的錯誤處理機制
 - 實時預覽與複製功能
 
-**版本**：v1.0 MVP
+### 📧 新增功能
+- **Newsletter 內容重組器** v1.0
+  將長文轉換為電子報格式
+
+**版本**：v1.1 MVP
 """)
