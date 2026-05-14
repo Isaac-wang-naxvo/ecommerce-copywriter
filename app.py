@@ -27,7 +27,10 @@ feature = st.sidebar.radio(
         "📦 電商商品文案生成器",
         "🔄 廣告標題 A/B 測試生成器",
         "❓ SEO FAQ 批量生成器",
-        "📧 Newsletter 內容重組器"
+        "📧 Newsletter 內容重組器",
+        "🍴 餐廳菜單文案優化器",
+        "🏥 診所衛教文件草稿機",
+        "🎥 YouTube 影片腳本大綱器"
     ]
 )
 
@@ -40,7 +43,6 @@ def get_openai_client():
     
     try:
         client = OpenAI(api_key=api_key)
-        # 驗證 API Key 的有效性
         return client
     except AuthenticationError:
         st.error("❌ API Key 無效，請檢查並重新輸入")
@@ -62,7 +64,7 @@ def call_openai_api(prompt, max_tokens=2000):
             messages=[
                 {
                     "role": "system",
-                    "content": "你是一位專業的電商行銷文案撰寫專家。"
+                    "content": "你是一位專業的內容創作與行銷文案撰寫專家。"
                 },
                 {
                     "role": "user",
@@ -131,8 +133,6 @@ if feature == "📦 電商商品文案生成器":
                 if result:
                     st.success("✅ 文案生成成功！")
                     st.markdown(result)
-                    
-                    # 複製按鈕
                     st.code(result)
 
 
@@ -243,9 +243,7 @@ A：[詳細答案]
                     st.code(result)
 
 
-# =====================
-# 功能 4: Newsletter 內容重組器
-# =====================
+# 功能4：Newsletter 內容重組器
 elif feature == "📧 Newsletter 內容重組器":
     st.header("📧 Newsletter 內容重組器")
     st.markdown("將長篇文章自動拆解、重組為適合電子報發送的精簡段落")
@@ -299,6 +297,210 @@ elif feature == "📧 Newsletter 內容重組器":
                     st.code(result)
 
 
+# =====================
+# 功能 5: 餐廳菜單文案優化器
+# =====================
+elif feature == "🍴 餐廳菜單文案優化器":
+    st.header("🍴 餐廳菜單文案優化器")
+    st.markdown("將普通菜名升級為美食行銷文案，提升顧客食慾")
+
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        dish_name = st.text_input(
+            "原始菜名",
+            placeholder="例：炒飯"
+        )
+        cooking_method = st.text_input(
+            "烹飪方式",
+            placeholder="例：鑊氣炒、快火焰炒"
+        )
+    
+    with col2:
+        core_ingredients = st.text_input(
+            "核心食材",
+            placeholder="例：松露、松阪豬、北菇"
+        )
+        special_selling_point = st.text_area(
+            "特殊賣點",
+            height=80,
+            placeholder="例：使用 20 年老滷水、限量供應、招牌秘製"
+        )
+
+    if st.button("🚀 優化菜單文案", use_container_width=True, type="primary", key="menu_gen"):
+        if not dish_name.strip():
+            st.warning("⚠️ 請填寫原始菜名")
+        else:
+            with st.spinner("正在優化菜單文案..."):
+                prompt = f"""
+你是一位美食行銷專家。請根據以下菜品資訊，產出升級版的菜單文案。
+
+【原始菜名】：{dish_name}
+【烹飪方式】：{cooking_method if cooking_method else "標準烹飪"}
+【核心食材】：{core_ingredients if core_ingredients else "基本食材"}
+【特殊賣點】：{special_selling_point if special_selling_point else "無特殊說明"}
+
+請提供以下內容（使用 Markdown 格式）：
+
+1. **升級版菜名**（產出 3 個富有創意、誘人的菜名）
+2. **菜品描述**（80 字以內，運用感官詞彙如：酥脆、濃郁、香氣撲鼻、入口即化等）
+3. **推薦搭配**（建議的飲品或其他菜品搭配，最多 3 個）
+4. **用餐建議**（享用方式、最佳溫度或時機等）
+
+請確保文案充滿美食吸引力，能夠激發顧客的食慾。
+"""
+                result = call_openai_api(prompt, max_tokens=1500)
+                
+                if result:
+                    st.success("✅ 菜單文案優化完成！")
+                    st.markdown(result)
+                    st.code(result)
+
+
+# =====================
+# 功能 6: 診所衛教文件草稿機
+# =====================
+elif feature == "🏥 診所衛教文件草稿機":
+    st.header("🏥 診所衛教文件草稿機")
+    st.markdown("將醫學術語轉化為大眾易懂的衛教文案")
+
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        medical_term = st.text_input(
+            "醫學名詞/病症",
+            placeholder="例：高血壓、糖尿病、呼吸道感染"
+        )
+    
+    with col2:
+        target_audience_health = st.selectbox(
+            "目標對象",
+            ["一般大眾", "長輩", "家長", "青少年", "患者家屬"]
+        )
+
+    if st.button("🚀 產生衛教文件", use_container_width=True, type="primary", key="health_gen"):
+        if not medical_term.strip():
+            st.warning("⚠️ 請填寫醫學名詞或病症")
+        else:
+            with st.spinner("正在產生衛教文件..."):
+                prompt = f"""
+你是一位醫學傳播專家。請根據以下資訊，產出通俗易懂的衛教文件。
+
+【醫學名詞/病症】：{medical_term}
+【目標對象】：{target_audience_health}
+
+要求：
+1. 將艱澀的醫學術語轉化為大眾易懂的白話文
+2. 使用簡單、親切的語言
+3. 避免過度醫學化
+
+請提供以下內容（使用 Markdown 格式）：
+
+1. **病症簡介**（用 2-3 句白話文解釋這個病症是什麼）
+2. **常見症狀**（列舉 3-4 個常見症狀）
+3. **預防重點**（列出 3 個最重要的預防或照護重點，附簡要說明）
+4. **日常保健小貼士**（3-4 個實用的日常保健建議）
+5. **何時應就醫**（列舉應該立即就醫的警示信號）
+
+請確保內容對 {target_audience_health} 來說清晰易懂。
+"""
+                result = call_openai_api(prompt, max_tokens=1800)
+                
+                if result:
+                    st.success("✅ 衛教文件產生完成！")
+                    
+                    # 添加免責聲明
+                    full_output = f"""
+⚠️ **重要免責聲明**
+本內容由 AI 生成，僅供參考之用。如有健康疑慮，請務必諮詢專業醫師進行診斷與治療。
+
+---
+
+{result}
+
+---
+
+⚠️ **重要免責聲明**
+本內容由 AI 生成，僅供參考之用。如有健康疑慮，請務必諮詢專業醫師進行診斷與治療。
+"""
+                    
+                    st.markdown(full_output)
+                    st.code(full_output)
+
+
+# =====================
+# 功能 7: YouTube 影片腳本大綱器
+# =====================
+elif feature == "🎥 YouTube 影片腳本大綱器":
+    st.header("🎥 YouTube 影片腳本大綱器")
+    st.markdown("產出結構化的 YouTube 影片腳本大綱，助您高效規劃影片內容")
+
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        video_topic = st.text_input(
+            "影片主題",
+            placeholder="例：如何在家做咖啡"
+        )
+    
+    with col2:
+        video_audience = st.text_input(
+            "目標受眾",
+            placeholder="例：咖啡愛好者、初學者"
+        )
+    
+    with col3:
+        video_length = st.selectbox(
+            "影片預計長度",
+            ["5-10 分鐘", "10-15 分鐘", "15-20 分鐘", "20-30 分鐘", "30 分鐘以上"]
+        )
+
+    if st.button("🚀 生成影片腳本大綱", use_container_width=True, type="primary", key="youtube_gen"):
+        if not video_topic.strip() or not video_audience.strip():
+            st.warning("⚠️ 請填寫影片主題與目標受眾")
+        else:
+            with st.spinner("正在生成 YouTube 腳本大綱..."):
+                prompt = f"""
+你是一位 YouTube 內容策略師。請根據以下資訊，產出結構化的影片腳本大綱。
+
+【影片主題】：{video_topic}
+【目標受眾】：{video_audience}
+【影片長度】：{video_length}
+
+要求：
+1. 大綱應該符合 {video_length} 的時間安排
+2. 針對 {video_audience} 的需求和興趣優化內容
+3. 包含時間碼估計
+
+請提供以下內容（使用 Markdown 格式）：
+
+## 📍 Hook 鉤子開場（前 15 秒）
+- 一個引人入勝的開場句子，立即抓住觀眾注意力
+- 簡單說明影片會帶來什麼價值
+
+## 📋 內容重點（主要段落）
+請根據影片長度，提供 3-5 個關鍵內容段落，每個段落包含：
+- 段落標題
+- 時間估計
+- 該段的 2-3 個核心教學點
+
+## 🎯 CTA 結尾（最後 20-30 秒）
+- 清楚的行動呼籲（訂閱、按讚、留言、查看相關影片等）
+- 簡短的結語
+- 下一支影片預告（如適用）
+
+## 💡 補充製作建議
+- 建議使用的視覺元素或文字卡
+- 可能需要的 B-roll 或示範
+"""
+                result = call_openai_api(prompt, max_tokens=2500)
+                
+                if result:
+                    st.success("✅ YouTube 腳本大綱產生完成！")
+                    st.markdown(result)
+                    st.code(result)
+
+
 # 頁腳說明
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
@@ -310,13 +512,14 @@ st.sidebar.markdown("""
 
 ### ⚡ 功能特點
 - 使用 GPT-4o Mini 模型
-- 產業級別的行銷文案品質
+- 產業級別的內容品質
 - 完整的錯誤處理機制
 - 實時預覽與複製功能
 
-### 📧 新增功能
-- **Newsletter 內容重組器** v1.0
-  將長文轉換為電子報格式
+### 🆕 新增功能 (v1.2)
+- **🍴 餐廳菜單文案優化器**
+- **🏥 診所衛教文件草稿機**
+- **🎥 YouTube 影片腳本大綱器**
 
-**版本**：v1.1 MVP
+**版本**：v1.2 MVP
 """)
